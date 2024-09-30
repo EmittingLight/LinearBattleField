@@ -22,5 +22,17 @@ public class LinearBattleFieldTest {
         char[] expectedField = {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.'};
         assertArrayEquals(expectedField, field.getField());
     }
+
+    @Test
+    public void testPlaceSingleShip() {
+        field.placeSingleShip();
+        int shipCount = 0;
+        for (char c : field.getField()) {
+            if (c == 'S') {
+                shipCount++;
+            }
+        }
+        assertEquals(1, shipCount);  // Ожидаем, что ровно один корабль будет на поле
+    }
 }
 
