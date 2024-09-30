@@ -38,13 +38,12 @@ public class LinearBattleFieldTest {
     public void testShootAtPosition() {
         field.placeSingleShip();  // Располагаем корабль
         int targetPosition = 5;
-        String result = field.shootAt(targetPosition);
+        String result = field.shootAt(targetPosition + 1);  // Ввод от 1 до 10, поэтому прибавляем 1
         assertTrue(result.equals("hit") || result.equals("промахнулись"));  // Ожидаем либо попадание, либо промах
     }
 
     @Test
     public void testHitAndMissMarkers() {
-        // Размещаем корабль на определенной позиции для теста
         field.placeSingleShip();
         int shipPosition = -1;
 
@@ -56,21 +55,18 @@ public class LinearBattleFieldTest {
             }
         }
 
-        // Проверка на попадание по кораблю
-        String hitResult = field.shootAt(shipPosition);
-        //assertEquals("hit", hitResult);  // Должно быть "hit" при попадании
-        assertEquals('x', field.getField()[shipPosition]);  // Должен быть "x" при попадании
+        String hitResult = field.shootAt(shipPosition + 1);
+        assertEquals("hit", hitResult);
+        assertEquals('x', field.getField()[shipPosition]);
 
-        // Проверка на промах (стреляем в другую позицию)
-        int missPosition = (shipPosition + 1) % field.getSize();  // Любая другая позиция, чтобы промахнуться
-        String missResult = field.shootAt(missPosition);
-        assertEquals("промахнулись", missResult);  // Должно быть "промахнулись" при промахе
-        assertEquals('*', field.getField()[missPosition]);  // Должен быть "*" при промахе
+        int missPosition = (shipPosition + 1) % field.getSize();
+        String missResult = field.shootAt(missPosition + 1);
+        assertEquals("промахнулись", missResult);
+        assertEquals('*', field.getField()[missPosition]);
     }
 
     @Test
     public void testShipSunkMessage() {
-        // Размещаем корабль и проверяем сообщения после потопления
         field.placeSingleShip();
         int shipPosition = -1;
 
@@ -82,8 +78,51 @@ public class LinearBattleFieldTest {
             }
         }
 
-        // Проверяем попадание и получение сообщения "потопили"
-        String result = field.shootAt(shipPosition);
+        String result = field.shootAt(shipPosition + 1);
         assertEquals("потопили", result);  // Ожидаем сообщение "потопили"
+        assertTrue(field.isGameOver());  // Проверяем, что игра завершилась
+    }
+
+    @Test
+    public void testTurnCount() {
+        field.placeSingleShip();
+        int shipPosition = -1;
+
+        // Находим, где расположен корабль
+        for (int i = 0; i < field.getSize(); i++) {
+            if (field.getField()[i] == 'S') {
+                shipPosition = i;
+                break;
+            }
+        }
+
+        // Стреляем по нескольким позициям
+        field.shootAt((shipPosition + 1) % field.getSize() + 1);  // Промах
+        field.shootAt(shipPosition + 1);  // Попадание и потопление
+
+        assertTrue(field.isGameOver());  // Проверяем, что игра завершилась
+        assertEquals(2, field.getTurnCount());  // Ожидаем, что было сделано 2 хода
+    }
+
+    @Test
+    public void testGameAlreadyOver() {
+        field.placeSingleShip();
+        int shipPosition = -1;
+
+        // Находим, где расположен корабль
+        for (int i = 0; i < field.getSize(); i++) {
+            if (field.getField()[i] == 'S') {
+                shipPosition = i;
+                break;
+            }
+        }
+
+        // Потопить корабль
+        field.shootAt(shipPosition + 1);
+        assertTrue(field.isGameOver());
+
+        // Попробовать стрелять после окончания игры
+        String result = field.shootAt(shipPosition + 1);
+        assertEquals("игра уже завершена", result);
     }
 }
