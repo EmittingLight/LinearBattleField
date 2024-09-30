@@ -1,8 +1,7 @@
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class LinearBattleFieldTest {
     private LinearBattleField field;
@@ -33,6 +32,14 @@ public class LinearBattleFieldTest {
             }
         }
         assertEquals(1, shipCount);  // Ожидаем, что ровно один корабль будет на поле
+    }
+
+    @Test
+    public void testShootAtPosition() {
+        field.placeSingleShip();  // Располагаем корабль
+        int targetPosition = 5;
+        String result = field.shootAt(targetPosition);
+        assertTrue(result.equals("hit") || result.equals("miss"));  // Ожидаем либо попадание, либо промах
     }
 }
 

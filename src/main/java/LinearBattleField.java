@@ -25,6 +25,16 @@ public class LinearBattleField {
         int position = random.nextInt(SIZE);
         field[position] = 'S';
     }
+
+    public String shootAt(int position) {
+        if (field[position] == 'S') {
+            field[position] = 'x';  // Попадание
+            return "hit";
+        } else {
+            field[position] = '*';  // Промах
+            return "miss";
+        }
+    }
 }
 
 
