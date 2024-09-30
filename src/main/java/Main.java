@@ -57,9 +57,16 @@ public class Main {
             displayField(game.getComputerField());
         }
 
-        // После окончания игры выводим информацию о количестве ходов
-        System.out.println("Игра завершена! Корабль потоплен.");
-        System.out.println("Количество сделанных ходов: " + game.getTurnCount());
+        // После окончания игры выводим информацию о победителе и количестве ходов
+        if (game.getWinner().equals("человек")) {
+            System.out.println("Игра завершена! Выйграл человек.");
+            System.out.println("Компьютер проиграл.");
+        } else if (game.getWinner().equals("компьютер")) {
+            System.out.println("Игра завершена! Компьютер победил.");
+            System.out.println("Человек проиграл.");
+        }
+        System.out.println("Количество ходов человека: " + game.getHumanTurnCount());
+        System.out.println("Количество ходов компьютера: " + game.getComputerTurnCount());
     }
 
     // Метод для отображения текущего состояния поля

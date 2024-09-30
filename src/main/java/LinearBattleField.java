@@ -8,7 +8,9 @@ public class LinearBattleField {
     private char[] computerHiddenField; // Скрытое поле компьютера (корабль компьютера)
     private Random random;
     private boolean gameOver;
-    private int turnCount;
+    private int humanTurnCount;
+    private int computerTurnCount;
+    private String winner; // Определяет, кто победил: "человек" или "компьютер"
 
     public LinearBattleField() {
         playerField = new char[SIZE];
@@ -25,7 +27,9 @@ public class LinearBattleField {
 
         random = new Random();
         gameOver = false;
-        turnCount = 0;
+        humanTurnCount = 0;
+        computerTurnCount = 0;
+        winner = "";
     }
 
     public int getSize() {
@@ -53,7 +57,13 @@ public class LinearBattleField {
     }
 
     public String playerShootAt(int userInput) {
-        return shootAt(userInput, computerHiddenField, computerField);
+        humanTurnCount++; // Увеличиваем счетчик ходов человека
+        String result = shootAt(userInput, computerHiddenField, computerField);
+        if (result.equals("потопили")) {
+            gameOver = true;
+            winner = "человек";
+        }
+        return result;
     }
 
     public String computerShootAt() {
@@ -62,7 +72,13 @@ public class LinearBattleField {
             computerInput = random.nextInt(SIZE);
         } while (playerField[computerInput] == 'x' || playerField[computerInput] == '*');
 
-        return shootAt(computerInput + 1, playerHiddenField, playerField);
+        computerTurnCount++; // Увеличиваем счетчик ходов компьютера
+        String result = shootAt(computerInput + 1, playerHiddenField, playerField);
+        if (result.equals("потопили")) {
+            gameOver = true;
+            winner = "компьютер";
+        }
+        return result;
     }
 
     private String shootAt(int userInput, char[] targetHiddenField, char[] visibleField) {
@@ -77,13 +93,10 @@ public class LinearBattleField {
             return "некорректный ввод";  // Если позиция вне диапазона, вернуть сообщение об ошибке
         }
 
-        turnCount++;  // Увеличиваем счетчик ходов на каждом выстреле
-
         if (targetHiddenField[position] == 'S') {
             targetHiddenField[position] = 'x';  // Попадание
             visibleField[position] = 'x';       // Отображаем попадание
             if (isShipSunk(targetHiddenField)) {
-                gameOver = true;  // Игра завершена, корабль потоплен
                 return "потопили";
             }
             return "hit";
@@ -112,7 +125,15 @@ public class LinearBattleField {
         return gameOver;
     }
 
-    public int getTurnCount() {
-        return turnCount;
+    public String getWinner() {
+        return winner;
+    }
+
+    public int getHumanTurnCount() {
+        return humanTurnCount;
+    }
+
+    public int getComputerTurnCount() {
+        return computerTurnCount;
     }
 }
