@@ -29,13 +29,24 @@ public class LinearBattleField {
     public String shootAt(int position) {
         if (field[position] == 'S') {
             field[position] = 'x';  // Попадание
+            if (isShipSunk()) {
+                return "потопили";  // Корабль полностью потоплен
+            }
             return "hit";
-        } else {
+        } else if (field[position] == '.') {
             field[position] = '*';  // Промах
-            return "miss";
+            return "промахнулись";  // Сообщение о промахе
+        } else {
+            return "уже стреляли сюда";  // Попытка выстрелить в уже пораженную ячейку
         }
     }
+
+    private boolean isShipSunk() {
+        for (char cell : field) {
+            if (cell == 'S') {
+                return false;  // Корабль еще не потоплен
+            }
+        }
+        return true;  // Корабль потоплен
+    }
 }
-
-
-
