@@ -1,22 +1,28 @@
 import java.util.Random;
 
-import java.util.Random;
-
 public class LinearBattleField {
     private static final int SIZE = 10;
-    private char[] field;        // Поле, видимое игроку
-    private char[] hiddenField;  // Поле, скрытое от игрока (содержит положение корабля)
+    private char[] playerField;        // Поле для отображения состояния игрока
+    private char[] computerField;      // Поле для отображения состояния компьютера
+    private char[] playerHiddenField;  // Скрытое поле игрока (корабль игрока)
+    private char[] computerHiddenField; // Скрытое поле компьютера (корабль компьютера)
     private Random random;
     private boolean gameOver;
     private int turnCount;
 
     public LinearBattleField() {
-        field = new char[SIZE];
-        hiddenField = new char[SIZE];
+        playerField = new char[SIZE];
+        computerField = new char[SIZE];
+        playerHiddenField = new char[SIZE];
+        computerHiddenField = new char[SIZE];
+
         for (int i = 0; i < SIZE; i++) {
-            field[i] = '.';
-            hiddenField[i] = '.';  // Скрытое поле также инициализируется пустым значением
+            playerField[i] = '.';
+            computerField[i] = '.';
+            playerHiddenField[i] = '.';
+            computerHiddenField[i] = '.';
         }
+
         random = new Random();
         gameOver = false;
         turnCount = 0;
@@ -26,16 +32,40 @@ public class LinearBattleField {
         return SIZE;
     }
 
-    public char[] getField() {
-        return field;
+    public char[] getPlayerField() {
+        return playerField;
     }
 
-    public void placeSingleShip() {
+    public char[] getComputerField() {
+        return computerField;
+    }
+
+    public void placePlayerShip(int position) {
+        if (position < 0 || position >= SIZE) {
+            throw new IllegalArgumentException("Некорректная позиция для корабля.");
+        }
+        playerHiddenField[position] = 'S';  // Игрок размещает корабль на скрытом поле
+    }
+
+    public void placeComputerShip() {
         int position = random.nextInt(SIZE);
-        hiddenField[position] = 'S';  // Располагаем корабль на скрытом поле
+        computerHiddenField[position] = 'S';  // Компьютер размещает корабль на скрытом поле
     }
 
-    public String shootAt(int userInput) {
+    public String playerShootAt(int userInput) {
+        return shootAt(userInput, computerHiddenField, computerField);
+    }
+
+    public String computerShootAt() {
+        int computerInput;
+        do {
+            computerInput = random.nextInt(SIZE);
+        } while (playerField[computerInput] == 'x' || playerField[computerInput] == '*');
+
+        return shootAt(computerInput + 1, playerHiddenField, playerField);
+    }
+
+    private String shootAt(int userInput, char[] targetHiddenField, char[] visibleField) {
         if (gameOver) {
             return "игра уже завершена";  // Если игра уже закончена, нельзя стрелять
         }
@@ -49,16 +79,16 @@ public class LinearBattleField {
 
         turnCount++;  // Увеличиваем счетчик ходов на каждом выстреле
 
-        if (hiddenField[position] == 'S') {
-            field[position] = 'x';  // Попадание отображается игроку
-            hiddenField[position] = 'x';  // Обновляем скрытое поле
-            if (isShipSunk()) {
+        if (targetHiddenField[position] == 'S') {
+            targetHiddenField[position] = 'x';  // Попадание
+            visibleField[position] = 'x';       // Отображаем попадание
+            if (isShipSunk(targetHiddenField)) {
                 gameOver = true;  // Игра завершена, корабль потоплен
                 return "потопили";
             }
             return "hit";
-        } else if (field[position] == '.') {
-            field[position] = '*';  // Промах отображается игроку
+        } else if (visibleField[position] == '.') {
+            visibleField[position] = '*';  // Промах
             return "промахнулись";
         } else {
             return "уже стреляли сюда";  // Попытка выстрелить в уже пораженную ячейку
@@ -69,8 +99,8 @@ public class LinearBattleField {
         return userInput - 1;  // Преобразование из диапазона (1-10) в (0-9)
     }
 
-    private boolean isShipSunk() {
-        for (char cell : hiddenField) {
+    private boolean isShipSunk(char[] targetHiddenField) {
+        for (char cell : targetHiddenField) {
             if (cell == 'S') {
                 return false;  // Корабль еще не потоплен
             }
@@ -86,4 +116,3 @@ public class LinearBattleField {
         return turnCount;
     }
 }
-
