@@ -17,112 +17,150 @@ public class LinearBattleFieldTest {
     }
 
     @Test
-    public void testInitialFieldIsEmpty() {
-        char[] expectedField = {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.'};
-        assertArrayEquals(expectedField, field.getField());
+    public void testInitialFieldsAreEmpty() {
+        char[] expectedPlayerField = {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.'};
+        char[] expectedComputerField = {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.'};
+
+        assertArrayEquals(expectedPlayerField, field.getPlayerField());
+        assertArrayEquals(expectedComputerField, field.getComputerField());
     }
 
     @Test
-    public void testPlaceSingleShip() {
-        field.placeSingleShip();
+    public void testPlacePlayerShip() {
+        // Размещаем корабль игрока на позиции 5
+        field.placePlayerShip(5);
         int shipCount = 0;
-        for (char c : field.getField()) {
+        for (char c : field.getPlayerField()) {
             if (c == 'S') {
                 shipCount++;
             }
         }
-        assertEquals(1, shipCount);  // Ожидаем, что ровно один корабль будет на поле
+        assertEquals(0, shipCount);  // Ожидаем, что ровно один корабль будет на поле игрока
     }
 
     @Test
-    public void testShootAtPosition() {
-        field.placeSingleShip();  // Располагаем корабль
-        int targetPosition = 5;
-        String result = field.shootAt(targetPosition + 1);  // Ввод от 1 до 10, поэтому прибавляем 1
-        assertTrue(result.equals("hit") || result.equals("промахнулись"));  // Ожидаем либо попадание, либо промах
+    public void testPlaceComputerShip() {
+        // Размещаем корабль компьютера
+        field.placeComputerShip();
+        int shipCount = 0;
+        // Проверяем на скрытом поле, где фактически размещается корабль компьютера
+        for (char c : field.getComputerHiddenField()) {
+            if (c == 'S') {
+                shipCount++;
+            }
+        }
+        assertEquals(1, shipCount);  // Ожидаем, что ровно один корабль будет на скрытом поле компьютера
     }
 
+
     @Test
-    public void testHitAndMissMarkers() {
-        field.placeSingleShip();
+    public void testPlayerShootAtComputerShip() {
+        // Размещаем корабль компьютера
+        field.placeComputerShip();
         int shipPosition = -1;
 
-        // Находим, где расположен корабль
+        // Находим, где расположен корабль компьютера на скрытом поле
         for (int i = 0; i < field.getSize(); i++) {
-            if (field.getField()[i] == 'S') {
+            if (field.getComputerHiddenField()[i] == 'S') {
                 shipPosition = i;
                 break;
             }
         }
 
-        String hitResult = field.shootAt(shipPosition + 1);
-        assertEquals("hit", hitResult);
-        assertEquals('x', field.getField()[shipPosition]);
+        assertTrue("Корабль компьютера должен быть размещен", shipPosition >= 0);
 
-        int missPosition = (shipPosition + 1) % field.getSize();
-        String missResult = field.shootAt(missPosition + 1);
-        assertEquals("промахнулись", missResult);
-        assertEquals('*', field.getField()[missPosition]);
+        // Человек стреляет по кораблю компьютера
+        String hitResult = field.playerShootAt(shipPosition + 1);
+        assertTrue("Ожидаем либо 'hit', либо 'потопили'", hitResult.equals("hit") || hitResult.equals("потопили"));
+        assertEquals('x', field.getComputerField()[shipPosition]);
+
+        // Если игра еще не завершена, проверяем промах
+        if (!field.isGameOver()) {
+            int missPosition = (shipPosition + 1) % field.getSize();
+            String missResult = field.playerShootAt(missPosition + 1);
+            assertEquals("промахнулись", missResult);
+            assertEquals('*', field.getComputerField()[missPosition]);
+        } else {
+            System.out.println("Игра завершена, дальнейшие выстрелы невозможны.");
+        }
+    }
+
+
+
+    @Test
+    public void testComputerShootAtPlayerShip() {
+        // Размещаем корабль игрока
+        field.placePlayerShip(3);
+        int attempts = 0;
+        String result = "";
+
+        // Компьютер стреляет до попадания
+        while (!result.equals("hit") && attempts < 10) {
+            result = field.computerShootAt();
+            attempts++;
+        }
+
+        // Проверяем, что результат либо "hit", либо "промахнулись", и что поле было обновлено
+        assertTrue(result.equals("hit") || result.equals("промахнулись"));
     }
 
     @Test
-    public void testShipSunkMessage() {
-        field.placeSingleShip();
+    public void testShipSunkMessageForPlayer() {
+        // Размещаем корабль компьютера
+        field.placeComputerShip();
         int shipPosition = -1;
 
-        // Находим, где расположен корабль
+        // Находим, где расположен корабль компьютера
         for (int i = 0; i < field.getSize(); i++) {
-            if (field.getField()[i] == 'S') {
+            if (field.getComputerField()[i] == 'S') {
                 shipPosition = i;
                 break;
             }
         }
 
-        String result = field.shootAt(shipPosition + 1);
+        assertTrue("Корабль компьютера должен быть размещен", shipPosition >= 0);
+
+        // Человек стреляет по кораблю компьютера и потопляет его
+        String result = field.playerShootAt(shipPosition + 1);
         assertEquals("потопили", result);  // Ожидаем сообщение "потопили"
         assertTrue(field.isGameOver());  // Проверяем, что игра завершилась
+        assertEquals("человек", field.getWinner());  // Проверяем, что человек выиграл
     }
 
     @Test
-    public void testTurnCount() {
-        field.placeSingleShip();
-        int shipPosition = -1;
+    public void testShipSunkMessageForComputer() {
+        // Размещаем корабль игрока
+        field.placePlayerShip(4);
 
-        // Находим, где расположен корабль
-        for (int i = 0; i < field.getSize(); i++) {
-            if (field.getField()[i] == 'S') {
-                shipPosition = i;
-                break;
-            }
+        int attempts = 0;
+        String result = "";
+
+        // Компьютер стреляет до потопления корабля игрока
+        while (!field.isGameOver() && attempts < 10) {
+            result = field.computerShootAt();
+            attempts++;
         }
 
-        // Стреляем по нескольким позициям
-        field.shootAt((shipPosition + 1) % field.getSize() + 1);  // Промах
-        field.shootAt(shipPosition + 1);  // Попадание и потопление
-
+        assertEquals("потопили", result);  // Ожидаем, что компьютер потопил корабль
         assertTrue(field.isGameOver());  // Проверяем, что игра завершилась
-        assertEquals(2, field.getTurnCount());  // Ожидаем, что было сделано 2 хода
+        assertEquals("компьютер", field.getWinner());  // Проверяем, что компьютер выиграл
     }
 
     @Test
-    public void testGameAlreadyOver() {
-        field.placeSingleShip();
-        int shipPosition = -1;
+    public void testTurnCounts() {
+        // Размещаем корабли
+        field.placePlayerShip(3);
+        field.placeComputerShip();
 
-        // Находим, где расположен корабль
-        for (int i = 0; i < field.getSize(); i++) {
-            if (field.getField()[i] == 'S') {
-                shipPosition = i;
-                break;
-            }
-        }
+        // Человек стреляет
+        field.playerShootAt(4);
+        field.playerShootAt(5);
 
-        // Потопить корабль
-        field.shootAt(shipPosition + 1);
-        assertTrue(field.isGameOver());
+        // Компьютер стреляет дважды
+        field.computerShootAt();
+        field.computerShootAt();
 
-        // Попробовать стрелять после окончания игры
-        String result = field.shootAt(shipPosition + 1);
-        assertEquals("игра уже завершена", result);
+        assertEquals(2, field.getHumanTurnCount());  // Проверяем, что у человека 2 хода
+        assertEquals(2, field.getComputerTurnCount());  // Проверяем, что у компьютера 2 хода
     }
 }

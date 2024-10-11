@@ -136,4 +136,9 @@ public class LinearBattleField {
     public int getComputerTurnCount() {
         return computerTurnCount;
     }
+
+    public char[] getComputerHiddenField() {
+        return computerHiddenField;
+    }
+
 }
