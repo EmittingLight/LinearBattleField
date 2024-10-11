@@ -1,5 +1,7 @@
 import java.util.Random;
 
+import java.util.Random;
+
 public class LinearBattleField {
     private static final int SIZE = 10;
     private char[] playerField;        // Поле для отображения состояния игрока
@@ -48,15 +50,28 @@ public class LinearBattleField {
         if (position < 0 || position >= SIZE) {
             throw new IllegalArgumentException("Некорректная позиция для корабля.");
         }
-        //System.out.println("Размещаем корабль на позиции: " + position);
-        playerField[position] = 'S';  // Размещаем корабль на поле игрока
-        //System.out.println("Поле игрока после размещения корабля в методе: " + Arrays.toString(playerField));
+        // Размещаем корабль на скрытом поле игрока
+        playerHiddenField[position] = 'S';
+        // Выводим для отладки, что корабль игрока размещён
+        System.out.println("Корабль игрока размещен на позиции: " + (position + 1));
     }
-
 
     public void placeComputerShip() {
         int position = random.nextInt(SIZE);
         computerHiddenField[position] = 'S';  // Компьютер размещает корабль на скрытом поле
+
+        // Отладочный вывод для отображения скрытого поля компьютера
+        System.out.println("Корабль компьютера размещен на позиции: " + (position + 1));
+        System.out.println("Скрытое поле компьютера:");
+        displayField(computerHiddenField);  // Вывод скрытого поля компьютера
+    }
+
+    // Метод для отображения текущего состояния поля
+    private static void displayField(char[] field) {
+        for (char cell : field) {
+            System.out.print(cell + " ");
+        }
+        System.out.println();
     }
 
     public String playerShootAt(int userInput) {
@@ -73,10 +88,17 @@ public class LinearBattleField {
         int computerInput;
         do {
             computerInput = random.nextInt(SIZE);
-        } while (playerField[computerInput] == 'x' || playerField[computerInput] == '*');
+        } while (playerField[computerInput] == 'x' || playerField[computerInput] == '*');  // Проверяем, что сюда еще не стреляли
 
         computerTurnCount++; // Увеличиваем счетчик ходов компьютера
+
+        System.out.println("Компьютер стреляет в ячейку: " + (computerInput + 1));  // Отладочное сообщение
+
+        // Стреляем по скрытому полю игрока (playerHiddenField)
         String result = shootAt(computerInput + 1, playerHiddenField, playerField);
+
+        System.out.println("Результат выстрела компьютера: " + result);  // Отладочное сообщение
+
         if (result.equals("потопили")) {
             gameOver = true;
             winner = "компьютер";
@@ -96,15 +118,19 @@ public class LinearBattleField {
             return "некорректный ввод";  // Если позиция вне диапазона, вернуть сообщение об ошибке
         }
 
+        System.out.println("Позиция выстрела: " + userInput);  // Отладочное сообщение
+
         if (targetHiddenField[position] == 'S') {
             targetHiddenField[position] = 'x';  // Попадание
             visibleField[position] = 'x';       // Отображаем попадание
+            System.out.println("Попадание в корабль!");  // Отладочное сообщение
             if (isShipSunk(targetHiddenField)) {
                 return "потопили";
             }
             return "hit";
         } else if (visibleField[position] == '.') {
             visibleField[position] = '*';  // Промах
+            System.out.println("Промах.");  // Отладочное сообщение
             return "промахнулись";
         } else {
             return "уже стреляли сюда";  // Попытка выстрелить в уже пораженную ячейку

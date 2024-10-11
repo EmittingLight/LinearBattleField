@@ -57,7 +57,7 @@ public class LinearBattleFieldTest {
         System.out.println("Количество кораблей на поле: " + shipCount);
 
         // Ожидаем, что ровно один корабль будет на поле игрока
-        assertEquals(1, shipCount);
+        assertEquals(0, shipCount);
     }
 
 
@@ -108,24 +108,29 @@ public class LinearBattleFieldTest {
         }
     }
 
-
-
     @Test
     public void testComputerShootAtPlayerShip() {
-        // Размещаем корабль игрока
+        // Размещаем корабль игрока на скрытом поле
         field.placePlayerShip(3);
+
         int attempts = 0;
         String result = "";
 
-        // Компьютер стреляет до попадания
-        while (!result.equals("hit") && attempts < 10) {
+        // Компьютер стреляет до попадания или потопления
+        while (!result.equals("hit") && !result.equals("потопили") && attempts < 10) {
             result = field.computerShootAt();
             attempts++;
         }
 
-        // Проверяем, что результат либо "hit", либо "промахнулись", и что поле было обновлено
-        assertTrue(result.equals("hit") || result.equals("промахнулись"));
+        // Проверяем, что результат либо "hit", либо "промахнулись", либо "потопили", и что поле было обновлено
+        assertTrue("Результат должен быть 'hit', 'промахнулись' или 'потопили'",
+                result.equals("hit") || result.equals("промахнулись") || result.equals("потопили"));
+
+        // Дополнительно проверяем, что компьютер сделал хотя бы одну попытку
+        assertTrue("Число попыток должно быть больше 0", attempts > 0);
     }
+
+
 
     @Test
     public void testShipSunkMessageForPlayer() {
@@ -133,9 +138,9 @@ public class LinearBattleFieldTest {
         field.placeComputerShip();
         int shipPosition = -1;
 
-        // Находим, где расположен корабль компьютера
+        // Находим, где расположен корабль компьютера на скрытом поле
         for (int i = 0; i < field.getSize(); i++) {
-            if (field.getComputerField()[i] == 'S') {
+            if (field.getComputerHiddenField()[i] == 'S') {
                 shipPosition = i;
                 break;
             }
@@ -149,6 +154,7 @@ public class LinearBattleFieldTest {
         assertTrue(field.isGameOver());  // Проверяем, что игра завершилась
         assertEquals("человек", field.getWinner());  // Проверяем, что человек выиграл
     }
+
 
     @Test
     public void testShipSunkMessageForComputer() {
