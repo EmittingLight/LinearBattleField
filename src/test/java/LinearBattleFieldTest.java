@@ -20,12 +20,19 @@ public class LinearBattleFieldTest {
 
     @Test
     public void testInitialFieldsAreEmpty() {
+        // Ожидаем, что все ячейки на поле игрока заполнены точками "."
         char[] expectedPlayerField = {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.'};
+
+        // Ожидаем, что все ячейки на поле компьютера также заполнены точками "."
         char[] expectedComputerField = {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.'};
 
+        // Проверяем поле игрока
         assertArrayEquals(expectedPlayerField, field.getPlayerField());
+
+        // Проверяем поле компьютера
         assertArrayEquals(expectedComputerField, field.getComputerField());
     }
+
 
     @Test
     public void testPlacePlayerShip() {
