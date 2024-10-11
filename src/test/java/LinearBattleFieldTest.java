@@ -1,6 +1,8 @@
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 public class LinearBattleFieldTest {
@@ -27,16 +29,30 @@ public class LinearBattleFieldTest {
 
     @Test
     public void testPlacePlayerShip() {
+        // Выводим состояние поля игрока до размещения корабля
+        System.out.println("Поле игрока до размещения корабля: " + Arrays.toString(field.getPlayerField()));
+
         // Размещаем корабль игрока на позиции 5
-        field.placePlayerShip(5);
+        field.placePlayerShip(0);
+
+        // Выводим состояние поля игрока после размещения корабля
+        System.out.println("Поле игрока после размещения корабля: " + Arrays.toString(field.getPlayerField()));
+
+        // Проверяем, что корабль был размещен
         int shipCount = 0;
-        for (char c : field.getPlayerField()) {
-            if (c == 'S') {
+        for (char c : field.getPlayerField()) {  // Проверяем видимое поле игрока
+            if (c == 'S') {  // Если корабль успешно размещен
                 shipCount++;
             }
         }
-        assertEquals(0, shipCount);  // Ожидаем, что ровно один корабль будет на поле игрока
+
+        // Выводим количество найденных кораблей
+        System.out.println("Количество кораблей на поле: " + shipCount);
+
+        // Ожидаем, что ровно один корабль будет на поле игрока
+        assertEquals(1, shipCount);
     }
+
 
     @Test
     public void testPlaceComputerShip() {

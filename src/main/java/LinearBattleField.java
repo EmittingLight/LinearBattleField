@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Random;
 
 public class LinearBattleField {
@@ -48,8 +49,11 @@ public class LinearBattleField {
         if (position < 0 || position >= SIZE) {
             throw new IllegalArgumentException("Некорректная позиция для корабля.");
         }
-        playerHiddenField[position] = 'S';  // Игрок размещает корабль на скрытом поле
+        //System.out.println("Размещаем корабль на позиции: " + position);
+        playerField[position] = 'S';  // Размещаем корабль на поле игрока
+        //System.out.println("Поле игрока после размещения корабля в методе: " + Arrays.toString(playerField));
     }
+
 
     public void placeComputerShip() {
         int position = random.nextInt(SIZE);
